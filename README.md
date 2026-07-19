@@ -106,10 +106,11 @@ pytest -q
 ## Streamlit Cloud Deployment
 1. Push repository to GitHub
 2. In Streamlit Cloud, create app from repo
-3. Set secrets/environment variables based on your provider:
+3. Ensure runtime uses Python 3.12 (`runtime.txt` is included in this repo)
+4. Set secrets/environment variables based on your provider:
    - Gemini: `LLM_PROVIDER=gemini`, `GEMINI_API_KEY=...`
    - OpenAI: `LLM_PROVIDER=openai`, `OPENAI_API_KEY=...`
-4. Use `streamlit run app.py` (default entrypoint)
+5. Use `streamlit run app.py` (default entrypoint)
 
 ## Docker Deployment
 ```powershell
