@@ -49,7 +49,6 @@ sports_quiz_agent/
 ├── .env.example
 ├── .gitignore
 ├── README.md
-├── Dockerfile
 ├── .streamlit/
 │   └── config.toml
 ├── config/
@@ -96,30 +95,6 @@ pytest -q
 ### Rendered Diagrams
 #### Data Flow Diagram
 ![Data Flow Diagram](assets/diagrams/rendered/data-flow.png)
-
-#### Class Diagram
-![Class Diagram](assets/diagrams/rendered/class-diagram.png)
-
-#### Sequence Diagram
-![Sequence Diagram](assets/diagrams/rendered/sequence-diagram.png)
-
-## Streamlit Cloud Deployment
-1. Push repository to GitHub
-2. In Streamlit Cloud, create app from repo
-3. Ensure runtime uses Python 3.12 (`runtime.txt` is included in this repo)
-4. Set secrets/environment variables based on your provider:
-   - Gemini: `LLM_PROVIDER=gemini`, `GEMINI_API_KEY=...`
-   - OpenAI: `LLM_PROVIDER=openai`, `OPENAI_API_KEY=...`
-5. Use `streamlit run app.py` (default entrypoint)
-
-## Docker Deployment
-```powershell
-docker build -t sports-quiz-agent .
-docker run --rm -p 8501:8501 --env-file .env sports-quiz-agent
-```
-
-## Screenshot Placeholder
-- Add app screenshots under `assets/` and reference here.
 
 ## Future Improvements
 - Add retries/backoff around all external providers
