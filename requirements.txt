@@ -1,0 +1,11 @@
+streamlit==1.47.1
+chromadb==1.0.15
+duckduckgo-search==7.5.5
+google-genai==1.27.0
+python-dotenv==1.0.1
+sentence-transformers==3.0.1
+pydantic==2.8.2
+pydantic-settings==2.3.4
+tenacity==8.5.0
+orjson==3.10.7
+pytest==8.3.2

@@ -1,0 +1,42 @@
+sequenceDiagram
+    actor User
+    participant UI as Streamlit UI
+    participant IDX as HistoricalFactsIndexer
+    participant GEN as QuizGenerationService
+    participant RAG as RAGQuizPipeline
+    participant EMB as EmbeddingGenerator
+    participant VDB as ChromaSportsStore
+    participant NEWS as DuckDuckGoNewsSearch
+    participant LLM as GeminiQuizGenerator
+    participant PARSER as QuizResponseParser
+    participant VALID as QuizValidator
+    participant SESS as QuizSessionManager
+
+    User->>UI: Select sport + difficulty, click Generate
+    UI->>IDX: index_historical_facts() (first run if needed)
+    IDX->>VDB: get_existing_ids()/upsert_facts()
+
+    UI->>GEN: generate(sport, difficulty, include_news=True)
+    GEN->>RAG: generate_quiz(...)
+    RAG->>EMB: embed_texts([query])
+    EMB-->>RAG: query_embedding
+    RAG->>VDB: query_facts(query_embedding, top_k, sport, difficulty)
+    VDB-->>RAG: historical_chunks
+    RAG->>NEWS: search_latest_news(sport, limit)
+    NEWS-->>RAG: news_results (or empty on failure)
+    RAG->>LLM: generate_quiz_text(grounded_prompt)
+    LLM-->>RAG: raw_response
+    RAG-->>GEN: pipeline_result
+
+    GEN->>PARSER: parse(raw_response)
+    PARSER-->>GEN: QuizPayload
+    GEN->>VALID: validate(payload, expected_*)
+    VALID-->>GEN: valid
+    GEN-->>UI: QuizGenerationResult
+
+    UI->>SESS: set_current_quiz(payload)
+    UI-->>User: Render questions + source context
+    User->>UI: Submit answers
+    UI->>SESS: submit_quiz()
+    SESS-->>UI: score, total
+    UI-->>User: Score + explanations + citations

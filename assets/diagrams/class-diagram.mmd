@@ -1,0 +1,92 @@
+classDiagram
+    class Settings {
+      +llm_provider: Literal
+      +gemini_api_key: str
+      +openai_api_key: str
+      +top_k_historical: int
+      +top_k_news: int
+      +quiz_question_count: int
+      +validate_generation_readiness() tuple~bool,str~
+      +gemini_candidate_models() list~str~
+    }
+
+    class SportsFact
+    class RetrievalChunk
+    class NewsResult
+    class QuizQuestion
+    class QuizPayload
+
+    class SportsFactsLoader {
+      +load_facts() list~SportsFact~
+      +query_facts() list~SportsFact~
+    }
+
+    class EmbeddingGenerator {
+      +compose_fact_document(fact) str
+      +embed_texts(texts) list~list~float~~
+      +embed_facts(facts) list~list~float~~
+    }
+
+    class ChromaSportsStore {
+      +upsert_facts(facts, documents, embeddings) void
+      +get_existing_ids() set~str~
+      +query_facts(query_embedding, top_k, sport, difficulty) list~RetrievalChunk~
+    }
+
+    class DuckDuckGoNewsSearch {
+      +search_latest_news(sport, limit) list~NewsResult~
+    }
+
+    class GeminiQuizGenerator {
+      +generate_quiz_text(prompt) str
+    }
+
+    class RAGQuizPipeline {
+      +generate_quiz(sport, difficulty, include_news) RAGQuizPipelineResult
+      -_merge_and_rank_context(historical_chunks, news_results) list~str~
+    }
+
+    class QuizResponseParser {
+      +parse(raw_text) QuizPayload
+    }
+
+    class QuizValidator {
+      +validate(payload, expected_sport, expected_difficulty, expected_question_count) QuizValidationResult
+    }
+
+    class QuizGenerationService {
+      +generate(sport, difficulty, include_news) QuizGenerationResult
+    }
+
+    class QuizSessionManager {
+      +set_current_quiz(payload) void
+      +set_answer(question_index, selected_option) void
+      +submit_quiz() tuple~int,int~
+      +reset_current_quiz() void
+    }
+
+    Settings --> SportsFactsLoader
+    Settings --> EmbeddingGenerator
+    Settings --> ChromaSportsStore
+    Settings --> DuckDuckGoNewsSearch
+    Settings --> GeminiQuizGenerator
+
+    SportsFactsLoader --> SportsFact
+    ChromaSportsStore --> SportsFact
+    ChromaSportsStore --> RetrievalChunk
+    DuckDuckGoNewsSearch --> NewsResult
+
+    RAGQuizPipeline --> EmbeddingGenerator
+    RAGQuizPipeline --> ChromaSportsStore
+    RAGQuizPipeline --> DuckDuckGoNewsSearch
+    RAGQuizPipeline --> GeminiQuizGenerator
+    RAGQuizPipeline --> RetrievalChunk
+    RAGQuizPipeline --> NewsResult
+
+    QuizGenerationService --> RAGQuizPipeline
+    QuizGenerationService --> QuizResponseParser
+    QuizGenerationService --> QuizValidator
+    QuizGenerationService --> QuizPayload
+    QuizPayload --> QuizQuestion
+
+    QuizSessionManager --> QuizPayload

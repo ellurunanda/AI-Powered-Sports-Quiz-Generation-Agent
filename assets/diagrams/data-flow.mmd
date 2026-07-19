@@ -1,0 +1,26 @@
+flowchart TD
+    U[User] --> UI[Streamlit UI app.py]
+    UI --> SESS[Session Manager]
+    UI --> GEN[Quiz Generation Service]
+
+    GEN --> RAG[RAG Quiz Pipeline]
+    RAG --> EMB[Embedding Generator]
+    EMB --> QV[(Query Vector)]
+    QV --> CHQ[Chroma Query]
+    CHQ --> VDB[(ChromaDB Persistent Store)]
+    VDB --> HIST[Historical Retrieval Chunks]
+
+    RAG --> NEWS[DuckDuckGo News Search]
+    NEWS --> NRES[Latest News Results]
+
+    HIST --> MERGE[Merge + Rank + Deduplicate Context]
+    NRES --> MERGE
+    MERGE --> PROMPT[Grounded Prompt Builder]
+    PROMPT --> LLM[LLM Provider Gemini/OpenAI]
+    LLM --> RAW[Raw Quiz JSON Text]
+
+    RAW --> PARSE[Quiz Parser]
+    PARSE --> VALID[Quiz Validator]
+    VALID --> PAYLOAD[Quiz Payload]
+    PAYLOAD --> UI
+    UI --> SCORE[Answer Evaluation + Explanations + Sources]
