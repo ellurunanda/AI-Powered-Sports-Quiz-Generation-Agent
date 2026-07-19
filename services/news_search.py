@@ -54,9 +54,9 @@ class DuckDuckGoNewsSearch:
 
         normalized_results: list[NewsResult] = []
         for item in raw_results:
-            title = str(item.get("title", "")).strip()
-            snippet = str(item.get("body", "")).strip()
-            url = str(item.get("href", "")).strip()
+            title = str(item.get("title", "") or item.get("headline", "")).strip()
+            snippet = str(item.get("body", "") or item.get("snippet", "") or item.get("content", "")).strip()
+            url = str(item.get("href", "") or item.get("url", "") or item.get("link", "")).strip()
             if not (title and snippet and url):
                 continue
             try:
@@ -77,6 +77,21 @@ class DuckDuckGoNewsSearch:
     def _search(self, *, query: str, max_results: int) -> list[dict]:
         ddgs_cls = self._get_ddgs_class()
         with ddgs_cls() as ddgs:
+            # Try dedicated news endpoint first; fall back to general text results.
+            try:
+                news_results = list(
+                    ddgs.news(
+                        query,
+                        region=self.settings.duckduckgo_region,
+                        timelimit="w",
+                        max_results=max_results,
+                    )
+                )
+                if news_results:
+                    return news_results
+            except Exception:  # noqa: BLE001
+                pass
+
             return list(
                 ddgs.text(
                     query,
@@ -94,8 +109,8 @@ class DuckDuckGoNewsSearch:
         return DDGS
 
     def _search_with_retries(self, *, query: str, max_results: int) -> list[dict]:
-        max_attempts = 3
-        delay_seconds = 0.6
+        max_attempts = 4
+        delay_seconds = 1.0
         last_exception: Exception | None = None
 
         for attempt in range(1, max_attempts + 1):
